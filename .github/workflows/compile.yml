@@ -1,0 +1,26 @@
+name: Compile BW16 Firmware
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Compile Arduino Sketch
+        uses: arduino/compile-sketches@v1
+        with:
+          fqbn: realtek:amebad:ameba_rtl8721csm
+          platforms: |
+            - name: realtek:amebad
+              source-url: https://github.com/ambiot/ambd_arduino/raw/master/Arduino_package/package_realtek_amebad_index.json
+          sketch-paths: |
+            - ./Repeater
+
+      - name: Upload BIN File
+        uses: actions/upload-artifact@v3
+        with:
+          name: BW16_Compiled_Firmware
+          path: ./Repeater/build/
+
