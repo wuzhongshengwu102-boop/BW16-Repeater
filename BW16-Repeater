@@ -1,0 +1,48 @@
+#include <WiFi.h>
+
+// ===== 1. 配置要连接的主路由器信息 =====
+char target_ssid[] = "Your_Router_SSID";     // 主路由器名称
+char target_pass[] = "Your_Router_Password"; // 主路由器密码
+
+// ===== 2. 配置 BW16 发出的中继热点信息 =====
+char ap_ssid[] = "BW16_WiFi_Repeater";       // BW16 扩展热点名称
+char ap_pass[] = "12345678";                 // BW16 扩展热点密码
+int  ap_channel = 6;                         // Wi-Fi 信道
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+
+  Serial.println("\n[BW16] 正在启动中继模式...");
+
+  // 1. 启动 BW16 的 AP 热点
+  WiFi.apbegin(ap_ssid, ap_pass, ap_channel);
+  Serial.print("AP 热点已启动，SSID: ");
+  Serial.println(ap_ssid);
+  Serial.print("AP IP 地址: ");
+  Serial.println(WiFi.apIP());
+
+  // 2. 连接主路由器 (STA 模式)
+  Serial.print("正在连接主路由器: ");
+  Serial.println(target_ssid);
+  WiFi.begin(target_ssid, target_pass);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\n成功连接到主路由器！");
+  Serial.print("STA IP 地址（主网段）: ");
+  Serial.println(WiFi.localIP());
+}
+
+void loop() {
+  // 保持连接心跳
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("主路连接断开，尝试重连...");
+    WiFi.begin(target_ssid, target_pass);
+  }
+  delay(10000);
+}
+
